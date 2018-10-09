@@ -1,15 +1,14 @@
-# 7 - Build the specific application image and push it into kubernetes (h2 database)
+# 8 - Build the specific application image and push it into kubernetes with a configmap configuration and a mariadb database
 ## Reminder
 
-This application is created in order to introduce [https://dmp.fabric8.io/](fabric8io/docker-maven-plugin) and [http://maven.fabric8.io/](fabric8io/fabric8-maven-plugin)
+This application is created in order to introduce [https://dmp.fabric8.io/](fabric8io/docker-maven-plugin)
 
-At this step we want to build the application image and run it into kubernetes
+At this step we want to add a database via docker
 
-NB :  since I am using minikube : (`mvn`) `fabric8:push` won't be used
 
 ## Sample To Do List web application using Spring Boot (and Mariadb)
 
-### This is a simple Todo list application using Spring Boot (Spring JPA, Thymeleaf template)
+### This is a simple Todo list application using Spring Boot (Spring JPA, Thymeleaf template, mariadb storage)
 
 1. instantiate a local mariadb
 
@@ -23,8 +22,13 @@ NB :  since I am using minikube : (`mvn`) `fabric8:push` won't be used
 
 2. Udpate and project files
 
-  2.1. udpate [pom.xml](pom.xml) in order define the project image build configuration
-
+  2.1. create 
+    - [src/main/fabric8/application-configmap.yaml](src/main/fabric8/application-configmap.yaml)
+    - [src/main/fabric8/prez-fabric8-dmp-deployment.yml](src/main/fabric8/prez-fabric8-dmp-deployment.yml)
+    - [src/main/fabric8/prez-fabric8-dmp-service.yaml](src/main/fabric8/prez-fabric8-dmp-service.yaml)
+    - [src/main/fabric8/mariadb-deployment.yml](src/main/fabric8/mariadb-deployment.yml)
+    - [src/main/fabric8/mariadb-service.yml](src/main/fabric8/mariadb-service.yml)
+  In order to define kubernetes ressources manifest
 
 3. build and run our project image using
 
@@ -36,14 +40,19 @@ NB :  since I am using minikube : (`mvn`) `fabric8:push` won't be used
   
 4. Check project 
 
-   4.1 map pod port to local host
-   `kubectl port-forward $(kubectl get po -l app=prez-fabric8-dmp -o name) 8080:8080`
+   4.1 map a pod port to local host
+   `kubectl port-forward $(kubectl -n prez-fabric8-dmp get po -l db!=mariadb -o name | tail -n 1) 8080:8080`
 
    4.2. Open a web browser to [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
-   4.3. Notice the specificity of the image 
-   `docker images | grep kanedafromparis/prez-fabric8-dmp`
+   4.3. check your database mouvement with
+   `watch -n 2 bash showtables.sh`
 
+   4.4 kill the pod and map another pod port to local host
+   kubectl delete $(kubectl -n prez-fabric8-dmp get po -l db!=mariadb -o name | tail -n 1) --grace-period=0
+   `kubectl port-forward $(kubectl get po -l app=prez-fabric8-dmp -o name) 8080:8080`
+   
    
 ## Next Step
-Now let's add a mariadb instance into kubernetes with our project, let's do some YAML
+
+Question and Response
