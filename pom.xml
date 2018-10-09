@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.kanedafromparis</groupId>
     <artifactId>prez-fabric8-dmp</artifactId>
-    <version>0.0.6-SNAPSHOT</version>
+    <version>0.0.7-SNAPSHOT</version>
     <packaging>jar</packaging>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -85,6 +85,40 @@
                     <buildRecreate>none</buildRecreate>
                     <mode>kubernetes</mode>
                     <namespace>${project.artifactId}</namespace>
+                    <images>
+                        <image>                            
+                            <name>kanedafromparis/${project.artifactId}:${project.version}</name>
+                            <build> 
+                                <from>adoptopenjdk/openjdk8:jdk8u172-b11-alpine-slim</from>
+                                <assembly>
+                                    <mode>dir</mode>
+                                    <targetDir>/opt/${project.artifactId}</targetDir>
+                                    <descriptor>../assembly/docker-assembly.xml</descriptor>
+                                </assembly>
+                                <maintainer />
+                                <workdir>/opt/${project.artifactId}</workdir>
+                                <env>
+                                    <JVM_OPTIONS>-Djava.security.egd=file:/dev/./urandom \
+                                        -XX:MaxRAMFraction=2 \
+                                        -XshowSettings:vm
+                                    </JVM_OPTIONS>                                    
+                                </env>
+                                <labels>
+                                    <version>${project.version}</version>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <nothing>${project.artifactId}</nothing>
+                                </labels>
+                              
+                                <user>1001</user>
+                                <entryPoint>
+                                    <shell>
+                                        java $JVM_OPTIONS \
+                                        -jar /opt/${project.artifactId}/${project.artifactId}-${project.version}.jar                                   
+                                    </shell>                                    
+                                </entryPoint>
+                            </build>
+                        </image>
+                    </images>
                 </configuration>
             </plugin>
         </plugins>
