@@ -7,7 +7,7 @@ metadata:
     app: prez-fabric8-dmp
   name: prez-fabric8-dmp
 spec:
-  clusterIP: None
+  type: NodePort
   ports:
   - port: 8080
     protocol: TCP
